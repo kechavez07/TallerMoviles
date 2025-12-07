@@ -1,16 +1,52 @@
+/*
+ * Archivo: expense_list_screen.dart
+ * 
+ * Propósito dentro de Clean Architecture:
+ * Es la PANTALLA PRINCIPAL de la aplicación que muestra la lista de gastos y el saldo total.
+ * Pertenece a la capa de presentación y se enfoca exclusivamente en la construcción de
+ * la interfaz de usuario.
+ * 
+ * Cómo interactúa con otros archivos:
+ * - Consume el ExpenseProvider mediante context.watch<ExpenseProvider>()
+ * - Navega hacia AddExpenseScreen cuando se presiona el botón de agregar
+ * - Muestra objetos Expense en una lista
+ * - Llama métodos del provider como deleteExpense
+ * 
+ * Descripción del código:
+ * La clase ExpenseListScreen es un widget sin estado (StatelessWidget) que construye
+ * la interfaz principal. Usa context.watch<ExpenseProvider>() para escuchar cambios en
+ * el estado del provider y reconstruirse automáticamente. El Scaffold incluye un AppBar
+ * con el título, y el body muestra un indicador de carga cuando isLoading es true.
+ * Cuando los datos están cargados, muestra una columna con dos secciones: una tarjeta
+ * que presenta el saldo total calculado y una lista scrolleable de gastos. Cada gasto
+ * se representa con un ListTile que muestra la descripción, fecha formateada, categoría,
+ * monto, y un botón de eliminar.
+ */
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart'; 
 import 'package:expense_tracker_session/domain/entities/expense.dart';
 import 'package:expense_tracker_session/presentation/providers/expense_provider.dart';
-import 'package:expense_tracker_session/presentation/screens/add_expense_screen.dart'; // Creada en el paso 6.2
+import 'package:expense_tracker_session/presentation/screens/add_expense_screen.dart';
 
+/// Pantalla principal que muestra la lista de gastos
+/// 
+/// Esta es la pantalla de inicio de la aplicación.
 class ExpenseListScreen extends StatelessWidget {
   const ExpenseListScreen({super.key});
 
+  /// Construye la interfaz de usuario de la pantalla
+  /// 
+  /// Este método se ejecuta cada vez que el provider notifica cambios.
+  /// 
+  /// Parámetros:
+  /// - [context]: El BuildContext que proporciona acceso al árbol de widgets
+  /// 
+  /// Retorna: El widget Scaffold que contiene toda la UI de la pantalla
   @override
   Widget build(BuildContext context) {
-    // Escucha el provider para reconstruir cuando hay cambios
+    // Escucha el provider para reconstruir automáticamente cuando hay cambios
     final provider = context.watch<ExpenseProvider>();
 
     return Scaffold(
@@ -39,6 +75,7 @@ class ExpenseListScreen extends StatelessWidget {
                 ),
               ],
             ),
+        // Botón flotante para agregar nuevos gastos
         floatingActionButton: Center(
           child: SizedBox(
             width: 180,
@@ -53,6 +90,7 @@ class ExpenseListScreen extends StatelessWidget {
                 textStyle: const TextStyle(fontSize: 18),
               ),
               onPressed: () {
+                // Navega a la pantalla de agregar gasto
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => const AddExpenseScreen(),
@@ -65,8 +103,14 @@ class ExpenseListScreen extends StatelessWidget {
     );
   }
 
-  // --- Widgets Auxiliares ---
+  // === MÉTODOS AUXILIARES PARA CONSTRUIR WIDGETS ===
 
+  /// Construye la tarjeta que muestra el saldo total
+  /// 
+  /// Parámetros:
+  /// - [balance]: El balance total calculado de todos los gastos
+  /// 
+  /// Retorna: Widget Card con el balance formateado
   Widget _buildTotalBalanceCard(double balance) {
     return Card(
       margin: const EdgeInsets.all(16),
@@ -94,6 +138,14 @@ class ExpenseListScreen extends StatelessWidget {
     );
   }
 
+  /// Construye un ListTile para mostrar un gasto individual
+  /// 
+  /// Parámetros:
+  /// - [context]: El BuildContext para acceder al provider
+  /// - [provider]: El ExpenseProvider para llamar al método deleteExpense
+  /// - [expense]: El objeto Expense a mostrar
+  /// 
+  /// Retorna: Widget ListTile con la información del gasto
   Widget _buildExpenseTile(BuildContext context, ExpenseProvider provider, Expense expense) {
     return ListTile(
       leading: CircleAvatar(
@@ -110,11 +162,11 @@ class ExpenseListScreen extends StatelessWidget {
             '${NumberFormat.currency(symbol: '\$').format(expense.amount)}',
             style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
           ),
-          // Botón de eliminar
+          // Botón de eliminar gasto
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.grey),
             onPressed: () {
-              // Llamada al método del Provider que usa el Caso de Uso y el Repositorio
+              // Llama al método del Provider que usa el Caso de Uso y el Repositorio
               provider.deleteExpense(expense.id);
             },
           ),
