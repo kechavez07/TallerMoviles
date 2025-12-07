@@ -76,6 +76,7 @@ Maneja la interfaz de usuario y la interacción con el usuario:
 - **Screens**: Pantallas de la aplicación
   - `ExpenseListScreen`: Lista de gastos
   - `AddExpenseScreen`: Formulario para agregar gastos
+  - `EditExpenseScreen`: Formulario para editar gastos
 
 ---
 
@@ -113,7 +114,8 @@ lib/
     │
     └── screens/
         ├── expense_list_screen.dart  # Pantalla principal
-        └── add_expense_screen.dart   # Pantalla de formulario
+        ├── add_expense_screen.dart   # Pantalla de formulario agregar
+        └── edit_expense_screen.dart  # Pantalla de formulario editar
 ```
 
 ---
@@ -205,20 +207,20 @@ Flujo de Dependencias: Presentation → Domain ← Data
                         OPERACIONES CRUD
                               │
         ┌─────────────────────┼─────────────────────┐
-        │                     │                     │
-        ▼                     ▼                     ▼
-    CREATE (C)            READ (R)            UPDATE (U)         DELETE (D)
-        │                     │                     │                │
-        ▼                     ▼                     ▼                ▼
-┌───────────────┐     ┌───────────────┐     ┌───────────────┐  ┌──────────────┐
-│ AddExpense    │     │ GetExpenses   │     │ UpdateExpense │  │DeleteExpense │
-│ UseCase       │     │ UseCase       │     │ UseCase       │  │UseCase       │
-└───────┬───────┘     └───────┬───────┘     └───────┬───────┘  └──────┬───────┘
-        │                     │                     │                │
-        └─────────────────────┼─────────────────────┘                │
-                              ▼                                      │
-                   ┌──────────────────────┐                          │
-                   │ ExpenseRepository    │◄─────────────────────────┘
+        │                     │                     │                     │
+        ▼                     ▼                     ▼                     ▼
+    CREATE (C)            READ (R)            UPDATE (U)             DELETE (D)
+        │                     │                     │                     │
+        ▼                     ▼                     ▼                     ▼
+┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌──────────────┐
+│ AddExpense    │     │ GetExpenses   │     │ UpdateExpense │     │DeleteExpense │
+│ UseCase       │     │ UseCase       │     │ UseCase       │     │UseCase       │
+└───────┬───────┘     └───────┬───────┘     └───────┬───────┘     └──────┬───────┘
+        │                     │                     │                     │
+        └─────────────────────┼─────────────────────┴─────────────────────┘
+                              ▼
+                   ┌──────────────────────┐
+                   │ ExpenseRepository    │
                    │   (Interface)        │
                    └──────────┬───────────┘
                               ▼
@@ -304,6 +306,43 @@ Flujo de Dependencias: Presentation → Domain ← Data
    │                            │                        │                     │
 ```
 
+### **5. Flujo de Ejecución: Editar un Gasto**
+
+```
+1. USUARIO                  2. PRESENTATION           3. DOMAIN              4. DATA
+   │                            │                        │                     │
+   │ Presiona "Editar"          │                        │                     │
+   ├───────────────────────────►│                        │                     │
+   │                            │ Navega a EditScreen    │                     │
+   │                            │ con expense            │                     │
+   │◄───────────────────────────┤                        │                     │
+   │ Formulario pre-llenado     │                        │                     │
+   │                            │                        │                     │
+   │ Modifica datos             │                        │                     │
+   │ Presiona "Guardar"         │                        │                     │
+   ├───────────────────────────►│                        │                     │
+   │                            │ updateExpense()        │                     │
+   │                            │ expense.copyWith()     │                     │
+   │                            ├───────────────────────►│                     │
+   │                            │   (Provider)           │                     │
+   │                            │                        │                     │
+   │                            │                        │ updateExpenseUseCase│
+   │                            │                        ├────────────────────►│
+   │                            │                        │                     │
+   │                            │                        │                     │ update()
+   │                            │                        │                     ├────►[List]
+   │                            │                        │                     │
+   │                            │                        │◄────────────────────┤
+   │                            │                        │   Success            │
+   │                            │◄───────────────────────┤                     │
+   │                            │                        │                     │
+   │                            │ notifyListeners()      │                     │
+   │◄───────────────────────────┤                        │                     │
+   │ Regresa a Lista            │                        │                     │
+   │ UI Actualizada             │                        │                     │
+   │                            │                        │                     │
+```
+
 ---
 
 ## ⚙️ Funcionalidades
@@ -311,6 +350,7 @@ Flujo de Dependencias: Presentation → Domain ← Data
 ### **Gestión de Gastos**
 - ✅ **Agregar gastos**: Captura descripción, monto, fecha y categoría
 - ✅ **Visualizar gastos**: Lista completa con detalles formateados
+- ✅ **Editar gastos**: Modificar cualquier campo de un gasto existente
 - ✅ **Eliminar gastos**: Remover gastos individuales
 - ✅ **Balance total**: Cálculo automático del total gastado
 
@@ -323,9 +363,11 @@ Flujo de Dependencias: Presentation → Domain ← Data
 ### **Características Técnicas**
 - 🔄 Estado reactivo con Provider
 - 🎨 Interfaz intuitiva y responsiva
+- ✏️ Edición inline de gastos con formulario pre-llenado
 - 📅 Selector de fecha nativo
 - 💰 Formato de moneda automático
 - 🆔 Generación automática de IDs únicos
+- ♻️ Uso del patrón copyWith para inmutabilidad
 
 ---
 

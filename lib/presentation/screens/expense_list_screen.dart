@@ -9,6 +9,7 @@
  * Cómo interactúa con otros archivos:
  * - Consume el ExpenseProvider mediante context.watch<ExpenseProvider>()
  * - Navega hacia AddExpenseScreen cuando se presiona el botón de agregar
+ * - Navega hacia EditExpenseScreen cuando se presiona el botón de editar
  * - Muestra objetos Expense en una lista
  * - Llama métodos del provider como deleteExpense
  * 
@@ -20,7 +21,7 @@
  * Cuando los datos están cargados, muestra una columna con dos secciones: una tarjeta
  * que presenta el saldo total calculado y una lista scrolleable de gastos. Cada gasto
  * se representa con un ListTile que muestra la descripción, fecha formateada, categoría,
- * monto, y un botón de eliminar.
+ * monto, un botón de editar y un botón de eliminar.
  */
 
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ import 'package:intl/intl.dart';
 import 'package:expense_tracker_session/domain/entities/expense.dart';
 import 'package:expense_tracker_session/presentation/providers/expense_provider.dart';
 import 'package:expense_tracker_session/presentation/screens/add_expense_screen.dart';
+import 'package:expense_tracker_session/presentation/screens/edit_expense_screen.dart';
 
 /// Pantalla principal que muestra la lista de gastos
 /// 
@@ -161,6 +163,18 @@ class ExpenseListScreen extends StatelessWidget {
           Text(
             '${NumberFormat.currency(symbol: '\$').format(expense.amount)}',
             style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+          ),
+          // Botón de editar gasto
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.blue),
+            onPressed: () {
+              // Navega a la pantalla de edición pasando el gasto a editar
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => EditExpenseScreen(expense: expense),
+                ),
+              );
+            },
           ),
           // Botón de eliminar gasto
           IconButton(
